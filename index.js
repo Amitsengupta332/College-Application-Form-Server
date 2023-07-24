@@ -32,6 +32,7 @@ async function run() {
 
 
         const collegeCollection = client.db('CollegeAdmissionForm').collection('Colleges')
+        const admissionCollection = client.db('CollegeAdmissionForm').collection('admission')
 
 
         app.get('/Colleges', async (req, res) => {
@@ -39,6 +40,35 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result);
         })
+
+        app.post('/admission', async (req, res) => {
+            const admissionForm = req.body;
+            try {
+                const result = await admissionCollection.insertOne(admissionForm);
+                res.status(200).json({ insertedId: result.insertedId });
+            } catch (error) {
+                console.error('Error inserting form data:', error);
+                res.status(500).json({ error: 'Failed to insert form data' });
+            }
+        });
+
+        app.get('/admission/search', async (req, res) => {
+            try {
+                console.log('Received request for admission search');
+                const result = await admissionCollection.find().toArray();
+                // console.log('Found data:', result);
+                res.json(result);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                res.status(500).json({ message: 'Server error' });
+            }
+        });
+
+        app.get('/admission/:email', async (req, res) => {
+            console.log(req.params.email);
+            const result = await admissionCollection.find({ email: req.params.email }).toArray();
+            res.json(result);
+          })
 
 
         //Search text
